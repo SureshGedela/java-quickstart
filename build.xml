@@ -1,0 +1,94 @@
+<!--
+build script for testing project. default will run the subscribe() example.
+-->
+<project name="test" default="run">
+	
+    <property name="base.dir" location="./" />
+
+	<!-- import build properties -->
+	<property file="build.properties"/>
+	
+	<property name="base.dir.src" location="${base.dir}/src" />
+	<property name="base.dir.classes" location="${base.dir}/classes" />
+	<property name="base.dir.lib" location="${base.dir}/lib" />
+	<property name="base.dir.generated" location="${base.dir}/generated" />
+	<property name="base.dir.generated.axis2" location="${base.dir.generated}/axis2" />
+	
+	<property name="base.dir.dist" location="${base.dir}/dist" />
+	<property name="base.dir.dist.zip" location="${base.dir}/quickstart_java.zip" />
+
+	<property name="test.properties" location="${base.dir}/test.properties" />
+	<property name="test.wsdl" location="${base.dir}/zuora.17.0.wsdl" />
+
+	<path id="test.classpath">
+		<fileset dir="${base.dir.lib}">
+			<include name="**/*.jar" />
+		</fileset>
+		<pathelement path="${base.dir.classes}" />
+	</path>
+
+	<!-- below tasks are for axis2 client-side generation -->
+	<target name="axis2-codegen">
+		<taskdef name="codegen" classname="org.apache.axis2.tool.ant.AntCodegenTask" classpathref="test.classpath" />
+	</target>
+
+	<target name="generate-axis2" depends="axis2-codegen">
+		<mkdir dir="${base.dir.generated.axis2}" />
+		<codegen wsdlfilename="${test.wsdl}" output="${base.dir.generated.axis2}" packagename="com.zuora.api.axis2" />
+	</target>
+
+	<target name="setup" depends="clean, generate-axis2">
+	</target>
+
+	<target name="compile" depends="setup">
+		<mkdir dir="${base.dir.classes}"/>
+		<javac srcdir="${base.dir.generated.axis2}/src:${base.dir.src}" 
+           destdir="${base.dir.classes}" 
+           includes="**/*.java"
+           debug="yes"
+           classpathref="test.classpath"/>
+	</target>
+
+	<target name="build" depends="compile">
+	</target>
+	
+	<target name="clean">
+		<delete file="${base.dir.dist.zip}" />
+		<delete dir="${base.dir.classes}" />
+		<delete dir="${base.dir.generated}" />
+	</target>
+
+	<target name="run" depends="subscribe"/>
+	
+	<target name="subscribe" depends="build">
+		<java classname="com.zuora.api.ApiTest">
+			<classpath refid="test.classpath" />
+		    <sysproperty key="test.properties" value="${test.properties}"/>
+			<arg value="subscribe" />
+		</java>		
+	</target>
+	
+	<target name="crud" depends="build">
+		<java classname="com.zuora.api.ApiTest">
+			<classpath refid="test.classpath" />
+		    <sysproperty key="test.properties" value="${test.properties}"/>
+			<arg value="crud" />
+		</java>		
+	</target>
+
+	<target name="dist">
+		
+		<!-- remove the classes/generated code for the zip -->
+		<delete file="${base.dir.dist.zip}" />
+		<delete dir="${base.dir.classes}" />
+		<delete dir="${base.dir.generated}" />
+		
+		<!-- build the zip -->
+		<zip destfile="${base.dir.dist.zip}"
+		    basedir="${base.dir}"
+			includes="**/*, .classpath, .project"
+			excludes="**/.svn, **/.classpath, **/.project, **/generated/*, **/classes/*"
+		/>	 
+		
+	</target>
+</project>
