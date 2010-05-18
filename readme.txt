@@ -19,7 +19,7 @@ This sample zip contains:
 
     /readme.txt - this file
     /build.xml - ant build files to compile and run the test code manually 
-  	/testdata.properties - external property file for setting different values while running the application
+  	/test.properties - external property file for setting different values while running the application
 	/zuora.17.0.wsdl - The latest version of the WSDL
     /lib - contains all dependent jar files to run the sample
     /src - example code to execute the Zuora APIs
@@ -40,10 +40,13 @@ The following are pre-requisites to successfully run the sample code:
     a.) with the User Role Permission to create Invoices (http://knowledgecenter.zuora.com/index.php/Z-Billing_Admin#Manage_User_Roles)
 3. A Product created with a Rate Plan & Rate Plan Component (http://knowledgecenter.zuora.com/index.php/Product_Catalog), with
     a.) The Effective Period (Start & End) of the Product/Rate Plan not expired (start < today and end > today)
-    b.) An Accounting Code specified on the Rate Plan Component (Update $AccountingCode in main.php with the code you specify)
+    b.) To keep things simple ,you'd better create a product with flat-fee of one-time charge for testing.
 4. A Zuora Gateway set up (http://knowledgecenter.zuora.com/index.php/Z-Payments_Admin#Setup_Payment_Gateway)
     a.) Either Authorize.net, CyberSource, PayPal Payflow Pro (production or test)
     b.) The setting "Verify new credit card" disabled
+5. Modify the Default Subscription Settings
+	a.) Turn off the "Require Customer Acceptance of Orders?"
+	b.) Turn off the "Require Service Activation of Orders?" 
 
 RUNNING THE EXAMPLE
 -------------------
@@ -53,9 +56,18 @@ RUNNING THE EXAMPLE
     a.) the username for your Zuora user.
     b.) the password for your Zuora user.
     c.) if you are testing against apisandbox, change the endpoint to https://apisandbox.zuora.com/apps/services/a/17.0
+    d.) the productName as the name of the Product
+    
 3. From the command line, run the test using ant
-    a.) "ant crud" to test create, update and delete of active account
-    b.) "ant subscribe" to test subscribe() call
+    a). "ant c-account": Creates an Active Account (Account w/ Status=Active and Bill To Contact/Payment Method)
+	b). "ant c-subscribe": Creates new subscription,one-call
+	c). "ant c-subscribe-no-p": Creates new subscription,one-call,no payments
+	d). "ant c-subscribe-w-existingAccount": Creates new subscription on existing account
+	e). "ant c-subscribe-w-amendment": Creates new subscription ,upgrade and downgrade
+	f). "ant cnl-subscribe": Cancel subscription
+	g). "ant c-payment": Creates payment on invoice
+	h). "ant c-usage": Add usage
+	I). "ant all": run all test case as above
 
 COMPILING THE EXAMPLE
 --------------------- 

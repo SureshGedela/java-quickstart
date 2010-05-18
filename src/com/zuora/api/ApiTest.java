@@ -17,27 +17,67 @@ public class ApiTest {
    private static final String FILE_PROPERTY_NAME = "test.properties";
    private static final String PROPERTY_ENDPOINT = "endpoint";
    private static final String PROPERTY_USERNAME = "username";
-	private static final String PROPERTY_PASSWORD = "password";
-	private static final String PROPERTY_ACCOUNTING_CODE = "accountingcode";
+   private static final String PROPERTY_PASSWORD = "password";
+   private static final String PROPERTY_PRODUCT_NAME = "productName";
 
    private ZuoraServiceStub stub;
    private SessionHeader header;
    private Properties properties;
 
    public static void main(String[] arg) {
-      
-      boolean testSubscribe = (arg != null && arg.length == 1 && "subscribe".equals(arg[0]));
-      
+            
       try {
          ApiTest test = new ApiTest();
-
          test.login();
-         if (testSubscribe){
-            test.testSubscribe();
-         } else {
-            test.testAccountCRUD();
-         }
          
+         if("all".equals(arg[0])){
+        	 test.testCreateAccount();
+        	 print("");
+        	 test.testSubscribe();
+        	 print("");
+        	 test.testSubscribeNoPayment();
+        	 print("");
+        	 test.testSubscribeWithAmendment();
+        	 print("");
+        	 test.testSubscribeWithExistAccount();
+        	 print("");
+        	 test.testCancelSubscribe();
+        	 print("");
+        	 test.testCreatePayment();
+        	 print("");
+        	 test.testCreateUsage();
+         }
+         else if("c-account".equals(arg[0])){
+        	 test.testCreateAccount();
+         }
+         else if("c-subscribe".equals(arg[0])){
+        	test.testSubscribe(); 
+         }
+         else if("c-subscribe-no-p".equals(arg[0])){
+        	 test.testSubscribeNoPayment(); 
+         }
+         else if("c-subscribe-w-existingAccount".equals(arg[0])){
+        	 test.testSubscribeWithExistAccount(); 
+         }
+         else if("c-subscribe-w-amendment".equals(arg[0])){
+        	 test.testSubscribeWithAmendment();
+         }
+         else if("cnl-subscribe".equals(arg[0])){
+        	 test.testCancelSubscribe();
+         }
+         else if("c-payment".equals(arg[0])){
+        	 test.testCreatePayment();
+         }
+         else if("c-usage".equals(arg[0])){
+        	 test.testCreateUsage();
+         }
+         else if("help".equals(arg[0])){
+        	 printHelp();
+         }
+         else{
+        	 print("command not found.");
+        	 printHelp();
+         }
       } catch(com.zuora.api.axis2.LoginFault e) {
          print("Login Failure : " + e.getFaultMessage().getLoginFault().getFaultMessage());
       } catch (Exception e) {
@@ -68,7 +108,7 @@ public class ApiTest {
       Login login = new Login();
       login.setUsername(getPropertyValue(PROPERTY_USERNAME));
       login.setPassword(getPropertyValue(PROPERTY_PASSWORD));
-
+      
       LoginResponse resp = stub.login(login);
       LoginResult result = resp.getResult();
 
@@ -99,7 +139,13 @@ public class ApiTest {
       boolean deleted = delete("Account", accId);
       print("Deleted Account: " + deleted);
    }
-   
+   /*
+    * 
+	   1. create account
+	   2. create bill to/sold to
+	   3. create default payment method
+	   4. update account to active
+    */
    public ID createAccount(boolean active) throws Exception {
 
       // create account
@@ -146,12 +192,30 @@ public class ApiTest {
    
    private Account queryAccount(ID accId) throws Exception {
       ZuoraServiceStub.Query query = new ZuoraServiceStub.Query();
-      query.setQueryString("SELECT id, name, accountnumber FROM account WHERE id = '"+accId.getID()+"'");
+      query.setQueryString("SELECT id, name, accountnumber,DefaultPaymentMethodId FROM account WHERE id = '"+accId.getID()+"'");
       ZuoraServiceStub.QueryResponse qResponse = stub.query(query, this.header);
       ZuoraServiceStub.QueryResult qResult = qResponse.getResult();
       Account rec = (Account)qResult.getRecords()[0];
       return rec;
    }
+   
+   private Subscription querySubscription(ID subscriptionId) throws Exception {
+      ZuoraServiceStub.Query query = new ZuoraServiceStub.Query();
+      query.setQueryString("SELECT id, name,status,version FROM Subscription WHERE Id = '"+subscriptionId.getID()+"'");
+      ZuoraServiceStub.QueryResponse qResponse = stub.query(query, this.header);
+      ZuoraServiceStub.QueryResult qResult = qResponse.getResult();
+      Subscription rec = (Subscription)qResult.getRecords()[0];
+      return rec;
+   }
+   
+   private Subscription queryPreviousSubscription(ID id) throws Exception {
+	      ZuoraServiceStub.Query query = new ZuoraServiceStub.Query();
+	      query.setQueryString("SELECT id, name,status,version FROM Subscription WHERE PreviousSubscriptionId = '"+id.getID()+"'");
+	      ZuoraServiceStub.QueryResponse qResponse = stub.query(query, this.header);
+	      ZuoraServiceStub.QueryResult qResult = qResponse.getResult();
+	      Subscription rec = (Subscription)qResult.getRecords()[0];
+	      return rec;
+	   }
    
    private ID update(ZObject acc) throws Exception {
 
@@ -177,20 +241,220 @@ public class ApiTest {
       return result.getSuccess();
 
    }
+   /*
+    * 8 User case start: 
+    */
+   /*
+    * # CREATE ACTIVE ACCOUNT
+	   # method to create an active account. requires that you have:
+		#
+		#   1.) a gateway setup, 
+		#   2.) gateway configured to not verify new credit cards
+		#
+		# if you want to verify a new credit card, make sure the card info
+		# you specify is correct.
+    */
+   private void testCreateAccount()throws Exception{
+	   print("Account Create....");
+	   ID accountId = createAccount(true);
+	   print("\tAccount Created:"+accountId.toString());
+   }
    
+   /*
+    * # CREATE NEW SUBSCRIPTION, ONE-CALL
+
+	   1. query product catalog for product rate plan (no charge, to simplify)
+	   2. subscribe() call with account/contact/payment method (one call)
+	   3. query subscription
+   */
    private void testSubscribe() throws Exception {
-      
-      ProductRatePlanCharge charge = getChargeByAccountingCode(getPropertyValue(PROPERTY_ACCOUNTING_CODE));
-      
+	   print("Subscribe call....");
+	   SubscribeResult[] result = createSubscribe(Boolean.TRUE);
+	   print("\t"+createMessage(result));
+	   Subscription sQuery = querySubscription(result[0].getSubscriptionId());
+       print("\tSubscription created:"+ sQuery.getName());
+   }
+   /*
+    * # CREATE NEW SUBSCRIPTION, ONE-CALL, NO PAYMENTS
+
+	   1. query product catalog for product rate plan (no charge, to simplify)
+	   2. subscribe call w/ #1 above
+	   3. subscribe options processpayments=false
+	   4. query subscription
+    */
+   private void testSubscribeNoPayment()throws Exception{
+	   print("Subscribe(no payments) call....");
+	   SubscribeResult[] result = createSubscribe(Boolean.FALSE);
+	   print("\t"+createMessage(result));
+	   Subscription sQuery = querySubscription(result[0].getSubscriptionId());
+       print("\tSubscription created:"+ sQuery.getName());
+   }
+   /*
+	   # CREATE NEW SUBSCRIPTION ON EXISTING ACCOUNT
+	
+	   1. create active account
+	   2. query product catalog for product rate plan (no charge, to simplify)
+	   3. subscribe w/ existing
+	   4. query subscription
+	*
+	*/
+   private void testSubscribeWithExistAccount()throws Exception{
+	   ID accountId = createAccount(true);
+	   print("Subscribe(with existing account["+accountId.getID()+"]) call....");
+	   createSubscribeWithExistingAccount(accountId);
+   }
+   
+   /*
+    * # CREATE NEW SUBSCRIPTION, UPGRADE AND DOWNGRADE
+
+	   1. create new order, one-call (#2)
+	   2. create amendment w/ new product (upgrade)
+	         1. new amendment
+	         2. new rate plan, type=NewProduct
+	         3. update amendment
+	   3. query subscription 
+	   4. create amendment w/ remove product (downgrade)
+	
+	         1. new amendment
+	         2. new rate plan, type=RemoveProduct
+	         3. update amendment
+    */
+   private void testSubscribeWithAmendment()throws Exception{
+	   print("Subscribe(do upgrade and downgrade) call....");
+	   //subscribe
+	   SubscribeResult[] result = createSubscribe(Boolean.TRUE);
+	   Subscription sub = querySubscription(result[0].getSubscriptionId());
+	   print("\t"+createMessage(result));
+	   print("\tSubscription created:"+ sub.getName());
+	   print("\tSubscription Version :"+sub.getVersion());
+	   Calendar ca = Calendar.getInstance();
+	   
+	   //upgrade (add new product)
+	   ID rpID = createAmendmentWithNewProduct(sub.getId(),ca);
+	   
+	   //query new version subscription
+	   Subscription newSub_new = queryPreviousSubscription(sub.getId());
+	   print("\tSubscription Version :"+newSub_new.getVersion());
+	   
+	   //downgrade (remove new product)
+	   createAmendmentWithRemoveProduct(newSub_new.getId(),rpID,ca);
+	   
+	   //query new subscription
+	   Subscription newSub_remove = queryPreviousSubscription(newSub_new.getId());
+	   print("\tSubscription Version :"+newSub_remove.getVersion());
+   }
+   
+   /*
+    * # CANCEL SUBSCRIPTION
+
+	   1. create new order, one-call (#2)
+	   2. create amendment w/ remove product
+	         1. new amendment
+	         2. new rate plan, type=RemoveProduct
+	         3. update amendment
+	   3. query new subscription
+	    */
+   private void testCancelSubscribe()throws Exception{
+	   print("Cancel Subscribe....");
+	   SubscribeResult[] result = createSubscribe(Boolean.TRUE);
+	   print("\t"+createMessage(result));
+	   Subscription sub = querySubscription(result[0].getSubscriptionId());
+       print("\tSubscription created:"+ sub.getName());
+       print("\tSubscrption status :"+sub.getStatus());
+       
+	   Calendar effectiveDate = Calendar.getInstance();
+	   effectiveDate.add(Calendar.DAY_OF_MONTH, 1);
+	   Amendment amd = new Amendment();
+	   amd.setName("Amendment:Cancellation");
+	   amd.setEffectiveDate(effectiveDate);
+	   amd.setType("Cancellation");
+	   amd.setSubscriptionId(sub.getId());
+	   amd.setStatus("Draft");
+	   ID amdID= create(amd);
+	   
+	   Amendment updateAmd = new Amendment();
+	   updateAmd.setId(amdID);
+	   updateAmd.setContractEffectiveDate(effectiveDate);
+	   updateAmd.setStatus("Completed");
+	   amdID= update(updateAmd);
+	   print("\tDowngrade completed(amendment id:"+amdID+").");
+	   
+	  //query new subscription
+	   Subscription newSub_cancel = queryPreviousSubscription(sub.getId());
+	   print("\tSubscrption status :"+newSub_cancel.getStatus());
+   }
+   /*
+	   # CREATE PAYMENT ON INVOICE
+	
+	   1. subscribe() call with account/contact/payment method (one call)
+	   2. create payment against invoice
+   */
+   private void testCreatePayment()throws Exception{
+	   print("Create Payment against Invoice....");
+	   SubscribeResult[] result = createSubscribe(Boolean.FALSE);
+	   print("\t"+createMessage(result));
+	   Subscription subscription = querySubscription(result[0].getSubscriptionId());
+	   print("\tSubscription created:"+ subscription.getName());
+	   
+	   ID iId = result[0].getInvoiceId();
+	   ID aId = result[0].getAccountId();
+	   Account account = queryAccount(aId);
+	   
+	   Payment payment = new Payment();
+	   payment.setEffectiveDate(Calendar.getInstance());
+	   payment.setAccountId(aId);
+	   payment.setAmount(1.00);
+	   payment.setPaymentMethodId(account.getDefaultPaymentMethodId());
+	   payment.setType("Electronic");
+	   payment.setStatus("Draft");
+	   ID pId = create(payment);
+	   
+	   InvoicePayment ip = new InvoicePayment();
+	   ip.setAmount(payment.getAmount());
+	   ip.setInvoiceId(iId);
+	   ip.setPaymentId(pId);
+	   ID ipId = create(ip);
+	   Payment updatePayment = new Payment();
+	   updatePayment.setId(pId);
+	   updatePayment.setStatus("Processed");
+	   pId = update(updatePayment);
+	   
+	   print("\n\tPayment created:"+pId);	   
+   }
+   
+   private void testCreateUsage()throws Exception{
+	   print("Create Usage....");
+	   ID aId = createAccount(true);
+	   
+	   Usage usage = new Usage();
+	   usage.setAccountId(aId);
+	   usage.setQuantity(20.0);
+	   usage.setUOM("Each");
+	   usage.setStartDateTime(Calendar.getInstance());
+	   ID uID = create(usage);
+	   
+	   print("\t Usage created:"+uID.getID());
+   }
+   
+   /*
+    * 8 user case end
+    */
+   private SubscribeResult[] createSubscribe(boolean isProcessPayment)throws Exception{
+	  ProductRatePlan prp = getProductRatePlanByProductName(getPropertyValue(PROPERTY_PRODUCT_NAME));
+	      
       Account acc = makeAccount();
       Contact con = makeContact();
       PaymentMethod pm = makePaymentMethod();
       Subscription subscription = makeSubscription();
 
+      SubscribeOptions sp = new SubscribeOptions();
+      sp.setGenerateInvoice(Boolean.TRUE);
+      sp.setProcessPayments(isProcessPayment);
+      
       SubscriptionData sd = new SubscriptionData();
       sd.setSubscription(subscription);
       
-      RatePlanData[] subscriptionRatePlanDataArray = makeRatePlanData(charge);
+      RatePlanData[] subscriptionRatePlanDataArray = makeRatePlanData(prp);
       sd.setRatePlanData(subscriptionRatePlanDataArray);
       
       SubscribeRequest sub = new SubscribeRequest();
@@ -198,6 +462,91 @@ public class ApiTest {
       sub.setBillToContact(con);
       sub.setPaymentMethod(pm);
       sub.setSubscriptionData(sd);
+      sub.setSubscribeOptions(sp);
+
+      SubscribeRequest[] subscribes = new SubscribeRequest[1];
+      subscribes[0] = sub;
+
+      Subscribe sr = new Subscribe();
+      sr.setSubscribes(subscribes);
+
+      SubscribeResponse resp = stub.subscribe(sr, this.header);
+      return resp.getResult();
+      
+   }
+   
+   private ID createAmendmentWithNewProduct(ID subID,Calendar effectiveDate)throws Exception{
+	   ProductRatePlan prp = getProductRatePlanByProductName(getPropertyValue(PROPERTY_PRODUCT_NAME));
+	   //create Amendment 
+	   Amendment amd = new Amendment();
+	   amd.setName("Amendment:new Product");
+	   amd.setType("NewProduct");
+	   amd.setSubscriptionId(subID);
+	   amd.setStatus("Draft");
+	   ID amdID= create(amd);
+	   
+	   //create rate plan
+	   RatePlan rp = new RatePlan();
+	   rp.setAmendmentId(amdID);
+	   rp.setAmendmentType(amd.getType());
+	   rp.setProductRatePlanId(prp.getId());
+	   ID rpID = create(rp);
+	   
+	   Amendment updateAmd = new Amendment();
+	   updateAmd.setId(amdID);
+	   updateAmd.setContractEffectiveDate(effectiveDate);
+	   updateAmd.setStatus("Completed");
+	   amdID = update(updateAmd);
+	   print("\tUpgrade completed(amendment id:"+amdID+")");
+	   return rpID;
+   }
+   
+   private ID createAmendmentWithRemoveProduct(ID subID,ID rpID ,Calendar effectiveDate)throws Exception{
+	   ProductRatePlan prp = getProductRatePlanByProductName(getPropertyValue(PROPERTY_PRODUCT_NAME));
+	   //create Amendment 
+	   Amendment amd = new Amendment();
+	   amd.setName("Amendment:remove Product");
+	   amd.setEffectiveDate(effectiveDate);
+	   amd.setType("RemoveProduct");
+	   amd.setSubscriptionId(subID);
+	   amd.setStatus("Draft");
+	   ID amdID= create(amd);
+	   
+	   //create rate plan
+	   RatePlan rp = new RatePlan();
+	   rp.setAmendmentId(amdID);
+	   rp.setAmendmentType(amd.getType());
+	   rp.setProductRatePlanId(prp.getId());
+	   rp.setAmendmentSubscriptionRatePlanId(rpID);
+	   create(rp);
+	   
+	   Amendment updateAmd = new Amendment();
+	   updateAmd.setId(amdID);
+	   updateAmd.setContractEffectiveDate(effectiveDate);
+	   updateAmd.setStatus("Completed");
+	   amdID = update(updateAmd);
+	   print("\tDowngrade completed(amendment id:"+amdID+").");
+	   return amdID;
+   }
+   
+   private void createSubscribeWithExistingAccount(ID accountId)throws Exception{
+	  ProductRatePlan prp = getProductRatePlanByProductName(getPropertyValue(PROPERTY_PRODUCT_NAME));
+	  Subscription subscription = makeSubscription();
+
+      SubscribeOptions sp = new SubscribeOptions();
+      sp.setGenerateInvoice(Boolean.TRUE);
+      sp.setProcessPayments(Boolean.TRUE);
+      
+      SubscriptionData sd = new SubscriptionData();
+      sd.setSubscription(subscription);
+      
+      RatePlanData[] subscriptionRatePlanDataArray = makeRatePlanData(prp);
+      sd.setRatePlanData(subscriptionRatePlanDataArray);
+      
+      SubscribeRequest sub = new SubscribeRequest();
+      sub.setAccount(queryAccount(accountId));
+      sub.setSubscriptionData(sd);
+      sub.setSubscribeOptions(sp);
 
       SubscribeRequest[] subscribes = new SubscribeRequest[1];
       subscribes[0] = sub;
@@ -207,40 +556,30 @@ public class ApiTest {
 
       SubscribeResponse resp = stub.subscribe(sr, this.header);
       SubscribeResult[] result = resp.getResult();
-      print(createMessage(result));
-      
+      print("\t"+createMessage(result));
+      Subscription sQuery = querySubscription(result[0].getSubscriptionId());
+      print("\tSubscription created:"+ sQuery.getName());
    }
    
-   private RatePlanData[] makeRatePlanData(ProductRatePlanCharge charge) {
+   private RatePlanData[] makeRatePlanData(ProductRatePlan ProductRatePlan) {
 
       RatePlanData ratePlanData = new RatePlanData();
 
       RatePlan ratePlan = new RatePlan();
-      ratePlanData.setRatePlan(ratePlan);
       ratePlan.setAmendmentType("NewProduct");
-      ratePlan.setProductRatePlanId(charge.getProductRatePlanId());
+      ratePlan.setProductRatePlanId(ProductRatePlan.getId());
          
-      RatePlanChargeData ratePlanChargeData = new RatePlanChargeData();
-      ratePlanData.setRatePlanChargeData(new RatePlanChargeData[]{ratePlanChargeData});
-      
-      RatePlanCharge ratePlanCharge = new RatePlanCharge();
-      ratePlanChargeData.setRatePlanCharge(ratePlanCharge);
-
-      ratePlanCharge.setProductRatePlanChargeId(charge.getId());
-      ratePlanCharge.setQuantity(1);
-      ratePlanCharge.setTriggerEvent("ServiceActivation");
-
+      ratePlanData.setRatePlan(ratePlan);
       return new RatePlanData[]{ratePlanData};
    }
 
-   private ProductRatePlanCharge getChargeByAccountingCode(String accountingCode) throws Exception {
-
+   private ProductRatePlan getProductRatePlanByProductName(String productName) throws Exception {
       ZuoraServiceStub.Query query = new ZuoraServiceStub.Query();
-      query.setQueryString("select Id, ProductRatePlanId from ProductRatePlanCharge where AccountingCode = '"+accountingCode+"'");
+      query.setQueryString("select Id, Name from ProductRatePlan where Name = '"+productName+"'");
       ZuoraServiceStub.QueryResponse qResponse = stub.query(query, this.header);
       ZuoraServiceStub.QueryResult qResult = qResponse.getResult();
-      ProductRatePlanCharge rec = (ProductRatePlanCharge)qResult.getRecords()[0];
-      return rec;
+      ProductRatePlan rp = (ProductRatePlan)qResult.getRecords()[0];
+      return rp;
 
    }
    
@@ -254,8 +593,7 @@ public class ApiTest {
       if (resultArray != null) {
          SubscribeResult result = resultArray[0];
          if (result.getSuccess()) {
-            resultString.append("\nSubscribe Result: \n")
-            .append("\n\tAccount Id: ").append(result.getAccountId())
+            resultString.append("\n\tAccount Id: ").append(result.getAccountId())
             .append("\n\tAccount Number: ").append(result.getAccountNumber())
             .append("\n\tSubscription Id: ").append(result.getSubscriptionId())
             .append("\n\tSubscription Number: ").append(result.getSubscriptionNumber())
@@ -348,6 +686,21 @@ public class ApiTest {
       return acc;
    }
    
+   private Amendment makeAmendment(String type, String subscriptionID,
+			String amendmentName) {
+		amendmentName = amendmentName == null ? "test_amend"
+				+ System.currentTimeMillis() : amendmentName;
+		type = type == null ? "NewProduct" : type;
+		Amendment amd = new Amendment();
+		ID id = new ID();
+		id.setID(subscriptionID);
+		amd.setSubscriptionId(id);
+		amd.setName(amendmentName);
+		amd.setEffectiveDate(Calendar.getInstance());
+		amd.setType(type);
+		return amd;
+	}
+   
    public boolean changeEndpoint() {
       return false;
    }
@@ -386,6 +739,19 @@ public class ApiTest {
 	
 	public static void print(String message) {
 		System.out.println(message);
+	}
+	public static void printHelp() {
+		StringBuilder buff = new StringBuilder("The commands are:\n\t");
+		buff.append("\"ant all\": run all test methods \n\t");
+		buff.append("\"ant c-account\": Creates an Active Account  \n\t");
+		buff.append("\"ant c-subscribe\": Creates new subscription,one-call \n\t");
+		buff.append("\"ant c-subscribe-no-p\": Creates new subscription,one-call,no payments \n\t");
+		buff.append("\"ant c-subscribe-w-existingAccount\": Creates new subscription on existing account \n\t");
+		buff.append("\"ant c-subscribe-w-amendment\": Creates new subscription ,upgrade and downgrade \n\t");
+		buff.append("\"ant cnl-subscribe\": Cancel subscription \n\t");
+		buff.append("\"ant c-payment\": Creates payment on invoice \n\t");
+		buff.append("\"ant c-usage\": Add usage \n\t");
+		print(buff.toString());
 	}
 	
 	protected boolean isNotNull(String name) {

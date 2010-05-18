@@ -58,17 +58,79 @@ build script for testing project. default will run the subscribe() example.
 		<delete dir="${base.dir.generated}" />
 	</target>
 
-	<target name="run" depends="subscribe"/>
+	<target name="run" depends="all"/>
 	
-	<target name="subscribe" depends="build">
+	<target name="all">
+			<java classname="com.zuora.api.ApiTest">
+				<classpath refid="test.classpath" />
+			    <sysproperty key="test.properties" value="${test.properties}"/>
+				<arg value="all" />
+			</java>		
+		</target>
+	<target name="c-account">
 		<java classname="com.zuora.api.ApiTest">
 			<classpath refid="test.classpath" />
 		    <sysproperty key="test.properties" value="${test.properties}"/>
-			<arg value="subscribe" />
+			<arg value="c-account" />
 		</java>		
 	</target>
-	
-	<target name="crud" depends="build">
+	<target name="c-subscribe" >
+		<java classname="com.zuora.api.ApiTest">
+			<classpath refid="test.classpath" />
+		    <sysproperty key="test.properties" value="${test.properties}"/>
+			<arg value="c-subscribe" />
+		</java>		
+	</target>
+	<target name="c-subscribe-no-p">
+		<java classname="com.zuora.api.ApiTest">
+			<classpath refid="test.classpath" />
+		    <sysproperty key="test.properties" value="${test.properties}"/>
+			<arg value="c-subscribe-no-p" />
+		</java>		
+	</target>
+	<target name="c-subscribe-w-existingAccount">
+		<java classname="com.zuora.api.ApiTest">
+			<classpath refid="test.classpath" />
+		    <sysproperty key="test.properties" value="${test.properties}"/>
+			<arg value="c-subscribe-w-existingAccount" />
+		</java>		
+	</target>
+	<target name="c-subscribe-w-amendment">
+		<java classname="com.zuora.api.ApiTest">
+			<classpath refid="test.classpath" />
+		    <sysproperty key="test.properties" value="${test.properties}"/>
+			<arg value="c-subscribe-w-amendment" />
+		</java>		
+	</target>
+	<target name="cnl-subscribe">
+		<java classname="com.zuora.api.ApiTest">
+			<classpath refid="test.classpath" />
+		    <sysproperty key="test.properties" value="${test.properties}"/>
+			<arg value="cnl-subscribe" />
+		</java>		
+	</target>
+	<target name="c-payment" >
+		<java classname="com.zuora.api.ApiTest">
+			<classpath refid="test.classpath" />
+		    <sysproperty key="test.properties" value="${test.properties}"/>
+			<arg value="c-payment" />
+		</java>		
+	</target>
+	<target name="c-usage" >
+		<java classname="com.zuora.api.ApiTest">
+			<classpath refid="test.classpath" />
+		    <sysproperty key="test.properties" value="${test.properties}"/>
+			<arg value="c-usage" />
+		</java>		
+	</target>
+	<target name="help" >
+		<java classname="com.zuora.api.ApiTest">
+			<classpath refid="test.classpath" />
+		    <sysproperty key="test.properties" value="${test.properties}"/>
+			<arg value="help" />
+		</java>		
+	</target>
+	<target name="crud" >
 		<java classname="com.zuora.api.ApiTest">
 			<classpath refid="test.classpath" />
 		    <sysproperty key="test.properties" value="${test.properties}"/>
