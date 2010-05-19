@@ -102,11 +102,11 @@ build script for testing project. default will run the subscribe() example.
 			<arg value="c-subscribe-w-amendment" />
 		</java>		
 	</target>
-	<target name="cnl-subscribe">
+	<target name="cnl-subscription">
 		<java classname="com.zuora.api.ApiTest">
 			<classpath refid="test.classpath" />
 		    <sysproperty key="test.properties" value="${test.properties}"/>
-			<arg value="cnl-subscribe" />
+			<arg value="cnl-subscription" />
 		</java>		
 	</target>
 	<target name="c-payment" >

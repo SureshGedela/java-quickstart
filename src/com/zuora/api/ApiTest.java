@@ -35,17 +35,17 @@ public class ApiTest {
         	 print("");
         	 test.testSubscribe();
         	 print("");
-        	 test.testSubscribeNoPayment();
+        	 test.testSubscribeWithNoPayment();
         	 print("");
-        	 test.testSubscribeWithAmendment();
+        	 test.testUpgradeAndDowngrade();
         	 print("");
-        	 test.testSubscribeWithExistAccount();
+        	 test.testSubscribeWithExistingAccount();
         	 print("");
-        	 test.testCancelSubscribe();
+        	 test.testCancelSubscription();
         	 print("");
-        	 test.testCreatePayment();
+        	 test.testMakePayment();
         	 print("");
-        	 test.testCreateUsage();
+        	 test.testAddUsage();
          }
          else if("c-account".equals(arg[0])){
         	 test.testCreateAccount();
@@ -54,22 +54,22 @@ public class ApiTest {
         	test.testSubscribe(); 
          }
          else if("c-subscribe-no-p".equals(arg[0])){
-        	 test.testSubscribeNoPayment(); 
+        	 test.testSubscribeWithNoPayment(); 
          }
          else if("c-subscribe-w-existingAccount".equals(arg[0])){
-        	 test.testSubscribeWithExistAccount(); 
+        	 test.testSubscribeWithExistingAccount(); 
          }
          else if("c-subscribe-w-amendment".equals(arg[0])){
-        	 test.testSubscribeWithAmendment();
+        	 test.testUpgradeAndDowngrade();
          }
-         else if("cnl-subscribe".equals(arg[0])){
-        	 test.testCancelSubscribe();
+         else if("cnl-subscription".equals(arg[0])){
+        	 test.testCancelSubscription();
          }
          else if("c-payment".equals(arg[0])){
-        	 test.testCreatePayment();
+        	 test.testMakePayment();
          }
          else if("c-usage".equals(arg[0])){
-        	 test.testCreateUsage();
+        	 test.testAddUsage();
          }
          else if("help".equals(arg[0])){
         	 printHelp();
@@ -282,7 +282,7 @@ public class ApiTest {
 	   3. subscribe options processpayments=false
 	   4. query subscription
     */
-   private void testSubscribeNoPayment()throws Exception{
+   private void testSubscribeWithNoPayment()throws Exception{
 	   print("Subscribe(no payments) call....");
 	   SubscribeResult[] result = createSubscribe(Boolean.FALSE);
 	   print("\t"+createMessage(result));
@@ -298,7 +298,7 @@ public class ApiTest {
 	   4. query subscription
 	*
 	*/
-   private void testSubscribeWithExistAccount()throws Exception{
+   private void testSubscribeWithExistingAccount()throws Exception{
 	   ID accountId = createAccount(true);
 	   print("Subscribe(with existing account["+accountId.getID()+"]) call....");
 	   createSubscribeWithExistingAccount(accountId);
@@ -319,7 +319,7 @@ public class ApiTest {
 	         2. new rate plan, type=RemoveProduct
 	         3. update amendment
     */
-   private void testSubscribeWithAmendment()throws Exception{
+   private void testUpgradeAndDowngrade()throws Exception{
 	   print("Subscribe(do upgrade and downgrade) call....");
 	   //subscribe
 	   SubscribeResult[] result = createSubscribe(Boolean.TRUE);
@@ -354,7 +354,7 @@ public class ApiTest {
 	         3. update amendment
 	   3. query new subscription
 	    */
-   private void testCancelSubscribe()throws Exception{
+   private void testCancelSubscription()throws Exception{
 	   print("Cancel Subscribe....");
 	   SubscribeResult[] result = createSubscribe(Boolean.TRUE);
 	   print("\t"+createMessage(result));
@@ -389,7 +389,7 @@ public class ApiTest {
 	   1. subscribe() call with account/contact/payment method (one call)
 	   2. create payment against invoice
    */
-   private void testCreatePayment()throws Exception{
+   private void testMakePayment()throws Exception{
 	   print("Create Payment against Invoice....");
 	   SubscribeResult[] result = createSubscribe(Boolean.FALSE);
 	   print("\t"+createMessage(result));
@@ -422,7 +422,7 @@ public class ApiTest {
 	   print("\n\tPayment created:"+pId);	   
    }
    
-   private void testCreateUsage()throws Exception{
+   private void testAddUsage()throws Exception{
 	   print("Create Usage....");
 	   ID aId = createAccount(true);
 	   
@@ -433,7 +433,7 @@ public class ApiTest {
 	   usage.setStartDateTime(Calendar.getInstance());
 	   ID uID = create(usage);
 	   
-	   print("\t Usage created:"+uID.getID());
+	   print("\tUsage created:"+uID.getID());
    }
    
    /*
@@ -748,7 +748,7 @@ public class ApiTest {
 		buff.append("\"ant c-subscribe-no-p\": Creates new subscription,one-call,no payments \n\t");
 		buff.append("\"ant c-subscribe-w-existingAccount\": Creates new subscription on existing account \n\t");
 		buff.append("\"ant c-subscribe-w-amendment\": Creates new subscription ,upgrade and downgrade \n\t");
-		buff.append("\"ant cnl-subscribe\": Cancel subscription \n\t");
+		buff.append("\"ant cnl-subscription\": Cancel subscription \n\t");
 		buff.append("\"ant c-payment\": Creates payment on invoice \n\t");
 		buff.append("\"ant c-usage\": Add usage \n\t");
 		print(buff.toString());
