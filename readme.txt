@@ -64,7 +64,7 @@ RUNNING THE EXAMPLE
 	c). "ant c-subscribe-no-p": Creates new subscription,one-call,no payments
 	d). "ant c-subscribe-w-existingAccount": Creates new subscription on existing account
 	e). "ant c-subscribe-w-amendment": Creates new subscription ,upgrade and downgrade
-	f). "ant cnl-subscribe": Cancel subscription
+	f). "ant cnl-subscription": Cancel subscription
 	g). "ant c-payment": Creates payment on invoice
 	h). "ant c-usage": Add usage
 	I). "ant all": run all test case as above
