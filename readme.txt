@@ -21,6 +21,7 @@ This sample zip contains:
     /build.xml - ant build files to compile and run the test code manually 
   	/test.properties - external property file for setting different values while running the application
 	/zuora.17.0.wsdl - The latest version of the WSDL
+    /jsp/signup.jsp - drop-in JSP page that uses API to display sign-up page and process new order via subscribe() call.
     /lib - contains all dependent jar files to run the sample
     /src - example code to execute the Zuora APIs
     /.classpath & .project - project files for eclipse
@@ -48,6 +49,11 @@ The following are pre-requisites to successfully run the sample code:
 	a.) Turn off the "Require Customer Acceptance of Orders?"
 	b.) Turn off the "Require Service Activation of Orders?" 
 
+COMPILING THE EXAMPLE
+--------------------- 
+
+1. From the command line, run "ant compile" to generate the Java stubs and compile the test code
+
 RUNNING THE EXAMPLE
 -------------------
 
@@ -69,8 +75,9 @@ RUNNING THE EXAMPLE
 	h). "ant c-usage": Add usage
 	I). "ant all": run all test case as above
 
-COMPILING THE EXAMPLE
---------------------- 
-
-1. From the command line, run "ant compile" to generate the Java stubs and compile the test code
+4. To run the signup.jsp page, you need to have
+    a.) Setup a webserver (Tomcat or Resin will do)
+    b.) Set source path to include both the /src directory and the /generated/axis2/src paths
+    c.) Include the /lib in the classpath
+    d.) Run the webserver and hit the signup.jsp page
 
