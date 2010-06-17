@@ -11,8 +11,8 @@ import com.zuora.api.axis2.ZuoraServiceStub.Error;
 
 public class ZuoraInterface {
 
-   public static String USERNAME = "<your username>";
-   public static String PASSWORD = "<your password>";
+   public static String USERNAME = "tester";
+   public static String PASSWORD = "qaqa";
    public static String ENDPOINT = "https://www.zuora.com/apps/services/a/17.0";
 
    private static Boolean GENERATE_INVOICE = false;
