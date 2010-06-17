@@ -11,8 +11,8 @@ import com.zuora.api.axis2.ZuoraServiceStub.Error;
 
 public class ZuoraInterface {
 
-   public static String USERNAME = "tester";
-   public static String PASSWORD = "qaqa";
+   public static String USERNAME = "<username>";
+   public static String PASSWORD = "<password>";
    public static String ENDPOINT = "https://www.zuora.com/apps/services/a/17.0";
 
    private static Boolean GENERATE_INVOICE = false;
@@ -287,7 +287,7 @@ public class ZuoraInterface {
       return pm;
    }
 
-   private SubscribeResult subscribe(String SubscriptionName, ProductRatePlanCharge[] charges, String Name, String FirstName, String LastName, String WorkEmail, String WorkPhone, String Address1,
+   public SubscribeResult subscribe(String SubscriptionName, ProductRatePlanCharge[] charges, String Name, String FirstName, String LastName, String WorkEmail, String WorkPhone, String Address1,
       String Address2, String City, String State, String Country, String PostalCode, String CreditCardType, String CreditCardNumber, String CreditCardHolderName, int CreditCardExpirationMonth,
       int CreditCardExpirationYear) throws Exception {
 
@@ -333,7 +333,7 @@ public class ZuoraInterface {
     * @return
     */
    public static String createMessage(SubscribeResult result) {
-      String resultString = null;
+      String resultString = "";
       if (result != null) {
          if (result.getSuccess()) {
             resultString = resultString + "<b>Subscribe Result: Success</b>";
@@ -364,6 +364,12 @@ public class ZuoraInterface {
 
    protected void print(String p) {
       System.out.print(p);
+   }
+
+   public static ID makeID(String string) {
+      ID id = new ID();
+      id.setID(string);
+      return id;
    }
 
 }
