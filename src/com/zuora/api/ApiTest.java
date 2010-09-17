@@ -575,9 +575,16 @@ public class ApiTest {
 
    private ProductRatePlan getProductRatePlanByProductName(String productName) throws Exception {
       ZuoraServiceStub.Query query = new ZuoraServiceStub.Query();
-      query.setQueryString("select Id, Name from ProductRatePlan where Name = '"+productName+"'");
+      query.setQueryString("select Id from Product where Name = '"+productName+"'");
       ZuoraServiceStub.QueryResponse qResponse = stub.query(query, this.header);
       ZuoraServiceStub.QueryResult qResult = qResponse.getResult();
+      if(qResult == null || qResult.getSize() == 0){
+    	  print("No Product found with Name '"+productName+"'");
+      }
+      Product p = (Product)qResult.getRecords()[0];
+      query.setQueryString("select Id,Name from ProductRatePlan where ProductId = '"+p.getId().getID()+"'");
+      qResponse = stub.query(query, this.header);
+      qResult = qResponse.getResult();
       ProductRatePlan rp = (ProductRatePlan)qResult.getRecords()[0];
       return rp;
 
