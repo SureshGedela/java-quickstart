@@ -37,27 +37,27 @@ The following are pre-requisites to successfully run the sample code:
 
 1. A Zuora Tenant
 2. A Zuora User
-    a.) with the User Role Permission to create Invoices (http://knowledgecenter.zuora.com/index.php/Z-Billing_Admin#Manage_User_Roles)
+    a) with the User Role Permission to create Invoices (http://knowledgecenter.zuora.com/index.php/Z-Billing_Admin#Manage_User_Roles)
 3. A Product created with a Rate Plan & Rate Plan Component (http://knowledgecenter.zuora.com/index.php/Product_Catalog), with
-    a.) The Effective Period (Start & End) of the Product/Rate Plan not expired (start < today and end > today)
-    b.) An Accounting Code specified on the Rate Plan Component (Update $AccountingCode in main.php with the code you specify)
+    a) The Effective Period (Start & End) of the Product/Rate Plan not expired (start < today and end > today)
+    b) An Accounting Code specified on the Rate Plan Component (Update $AccountingCode in main.php with the code you specify)
 4. A Zuora Gateway set up (http://knowledgecenter.zuora.com/index.php/Z-Payments_Admin#Setup_Payment_Gateway)
-    a.) Either Authorize.net, CyberSource, PayPal Payflow Pro (production or test)
-    b.) The setting "Verify new credit card" disabled
+    a) Either Authorize.net, CyberSource, PayPal Payflow Pro (production or test)
+    b) The setting "Verify new credit card" disabled
 
 RUNNING THE EXAMPLE
 -------------------
 
 1. Unzip the files contained in the quickstart_java.zip file to a folder on you hard drive.  
 2. In test.properties, specify:
-    a.) the username for your Zuora user.
-    b.) the password for your Zuora user.
-    c.) if you are testing against apisandbox, change the endpoint to https://apisandbox.zuora.com/apps/services/a/38.0
+    a) the username for your Zuora user.
+    b) the password for your Zuora user.
+    c) if you are testing against apisandbox, change the endpoint to https://apisandbox.zuora.com/apps/services/a/38.0
 3. From the command line, run the test using ant
-    a.) "ant crud" to test create, update and delete of active account
-    b.) "ant subscribe" to test subscribe() call
+    a) "ant crud" to test create, update and delete of active account
+    b) "ant subscribe" to test subscribe() call
 4. Run from command line as a java application.
-	a.)"account-create" to test create Account. Get the proper argument from ApiTest.java to run the specific operation i,e account-update, subscribe-create etc.
+	a)"account-create" to test create Account. Get the proper argument from ApiTest.java to run the specific operation i,e account-update, subscribe-create etc.
 
 COMPILING THE EXAMPLE
 --------------------- 
