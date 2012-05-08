@@ -64,24 +64,25 @@ COMPILING THE EXAMPLE
 
 1. From the command line, run "ant compile" to generate the Java stubs and compile the test code
 
-DEBUGGING THE EXAMPLE
+DEBUGGING THE EXAMPLE IN ECLIPSE IDE
 ---------------------
-1. Load the project into Eclipse.  
-a) Copy the unzipped foler into your Eclipse workspace
+1. From the command line, run "ant setup" to generate the Java stubs. 
+2. Load the project into Eclipse.  
+a) Copy the unzipped folder into your Eclipse workspace
 b) In Eclipse, create a new Java project: 
 - File -> New -> Java Project
 - Enter project name, and point the project's root folder to the unzipped folder's location
 - Click 'Next'
 - Click 'Finish'
-2. Create a Run/Debug Configuraiton for ApiTest.java
+3. Create a Run/Debug Configuraiton for ApiTest.java
 c) Navigate to src/com.zuora.api/ApiTest.java, and right click to select "Run As => Run Configurations".  Click on "Arguments" tab, and specify the VM parameters as: 
   -Dtest.properties=./test.properties
   
-UPDATE THE WSDL VERSION
+UPDATING THE WSDL VERSION
 -----------------------
 If you want to use another WSDL version instead of the current WSDL version in the sample code, you can follow the steps below: 
 1. In test.properties file, change the zuora.wsdl.version value
 2. In test.properties file, change the version number in the end point
 3. Copy the WSDL file to the root folder, e.g. zuora.a.37.0.wsdl
-4. Run "ant setup".  This will re-generate the Java classes from the new WSDL file.
+4. Run "ant setup".  This will re-generate the Java stubs from the new WSDL file.
 
