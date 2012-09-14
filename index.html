@@ -1,0 +1,164 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Zuora ZCommerce by zuora</title>
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="javascripts/main.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+  </head>
+  <body>
+
+      <header>
+        <h1>Zuora ZCommerce</h1>
+        <p>Java Quick-start Toolkit</p>
+      </header>
+
+      <div id="banner">
+        <span id="logo"></span>
+
+        <a href="https://github.com/zuora/java-quickstart" class="button fork"><strong>View On GitHub</strong></a>
+        <div class="downloads">
+          <span>Downloads:</span>
+          <ul>
+            <li><a href="https://github.com/zuora/java-quickstart/zipball/master" class="button">ZIP</a></li>
+            <li><a href="https://github.com/zuora/java-quickstart/tarball/master" class="button">TAR</a></li>
+          </ul>
+        </div>
+      </div><!-- end banner -->
+
+    <div class="wrapper">
+      <nav>
+        <ul></ul>
+      </nav>
+      <section>
+        <h2>Introduction</h2>
+
+<p>Thank you for downloading the Zuora QuickStart Java Toolkit.  This download contains code designed to help you begin using Zuora APIs.</p>
+
+<h2>Requirements</h2>
+
+<ul>
+<li>JDK 1.6 </li>
+<li>Apache Axis 1.4</li>
+<li>Apache Ant </li>
+</ul><h2>Contents</h2>
+
+<p>This sample zip contains:</p>
+
+<pre><code> /readme.txt - this file
+ /build.xml - ant build files to compile and run the test code manually 
+ /test.properties - external property file for setting different values while running the application
+ /zuora.a.38.0.wsdl - The latest version of the WSDL
+ /lib - contains all dependent jar files to run the sample
+ /src - example code to execute the Zuora APIs
+ /.classpath &amp; .project - project files for eclipse
+</code></pre>
+
+<h2>Documentation and Support</h2>
+
+<p>API Documentation is available at <a href="http://developer.zuora.com">http://developer.zuora.com</a></p>
+
+<h2>Pr-Requisites</h2>
+
+<p>The following are pre-requisites to successfully run the sample code:</p>
+
+<ol>
+<li>A Zuora Tenant</li>
+<li>A Zuora User
+
+<ul>
+<li>With the User Role Permission to create Invoices (<a href="http://knowledgecenter.zuora.com/index.php/Z-Billing_Admin#Manage_User_Roles">http://knowledgecenter.zuora.com/index.php/Z-Billing_Admin#Manage_User_Roles</a>)</li>
+</ul>
+</li>
+<li>A Product created with a Rate Plan &amp; Rate Plan Component (<a href="http://knowledgecenter.zuora.com/index.php/Product_Catalog">http://knowledgecenter.zuora.com/index.php/Product_Catalog</a>), with
+
+<ul>
+<li>The Effective Period (Start &amp; End) of the Product/Rate Plan not expired (start &lt; today and end &gt; today)</li>
+<li>An Accounting Code specified on the Rate Plan Component (Update $AccountingCode in main.php with the code you specify)</li>
+</ul>
+</li>
+<li>A Zuora Gateway set up (<a href="http://knowledgecenter.zuora.com/index.php/Z-Payments_Admin#Setup_Payment_Gateway">http://knowledgecenter.zuora.com/index.php/Z-Payments_Admin#Setup_Payment_Gateway</a>)
+
+<ul>
+<li>Either Authorize.net, CyberSource, PayPal Payflow Pro (production or test)</li>
+<li>The setting "Verify new credit card" disabled</li>
+</ul>
+</li>
+</ol><h2>Running the Example</h2>
+
+<ol>
+<li>Unzip the files contained in the quickstart_java.zip file to a folder on you hard drive.<br>
+</li>
+<li>In test.properties, specify:
+
+<ul>
+<li>the username for your Zuora user.</li>
+<li>the password for your Zuora user.</li>
+<li>if you are testing against apisandbox, change the endpoint to <a href="https://apisandbox.zuora.com/apps/services/a/38.0">https://apisandbox.zuora.com/apps/services/a/38.0</a>
+</li>
+</ul>
+</li>
+<li>From the command line, run the test using ant
+
+<ul>
+<li>"ant crud" to test create, update and delete of active account</li>
+<li>"ant subscribe" to test subscribe() call</li>
+</ul>
+</li>
+<li>Run from command line as a java application
+
+<ul>
+<li>"account-create" to test create Account. Get the proper argument from ApiTest.java to run the specific operation i,e account-update, subscribe-create etc.</li>
+</ul>
+</li>
+</ol><h2>Compiling the Example</h2>
+
+<p>From the command line, run "ant compile" to generate the Java stubs and compile the test code</p>
+
+<h2>Debugging the Example in Eclipse IDE</h2>
+
+<ol>
+<li>From the command line, run "ant setup" to generate the Java stubs. </li>
+<li>Load the project into Eclipse.<br>
+</li>
+<li>Copy the unzipped folder into your Eclipse workspace</li>
+<li>In Eclipse, create a new Java project: 
+
+<ul>
+<li>File -&gt; New -&gt; Java Project</li>
+<li>Enter project name, and point the project's root folder to the unzipped folder's location</li>
+<li>Click 'Next'</li>
+<li>Click 'Finish'</li>
+</ul>
+</li>
+<li>Create a Run/Debug Configuraiton for ApiTest.java</li>
+<li>Navigate to src/com.zuora.api/ApiTest.java, and right click to select "Run As =&gt; Run Configurations".  Click on "Arguments" tab, and specify the VM parameters as: 
+-Dtest.properties=./test.properties</li>
+</ol><h2>Updating the WSDL Version</h2>
+
+<p>If you want to use another WSDL version instead of the current WSDL version in the sample code, you can follow the steps below: </p>
+
+<ol>
+<li>  In test.properties file, change the zuora.wsdl.version value</li>
+<li>  In test.properties file, change the version number in the end point</li>
+<li>  Copy the WSDL file to the root folder, e.g. zuora.a.37.0.wsdl</li>
+<li>  Run "ant setup".  This will re-generate the Java stubs from the new WSDL file.</li>
+</ol>
+      </section>
+      <footer>
+        <p>Project maintained by <a href="https://github.com/zuora">zuora</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="http://twitter.com/#!/michigangraham">mattgraham</a></small></p>
+      </footer>
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+    
+  </body>
+</html>
