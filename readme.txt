@@ -42,7 +42,7 @@ The following are pre-requisites to successfully run the sample code:
     a) with the User Role Permission to create Invoices (http://knowledgecenter.zuora.com/index.php/Z-Billing_Admin#Manage_User_Roles)
 3. A Product created with a Rate Plan & Rate Plan Component (http://knowledgecenter.zuora.com/index.php/Product_Catalog), with
     a) The Effective Period (Start & End) of the Product/Rate Plan not expired (start < today and end > today)
-    b) An Accounting Code specified on the Rate Plan Component (Update $AccountingCode in main.php with the code you specify)
+    b) An Accounting Code specified on the Rate Plan Component (Update $AccountingCode in main.php with the code you specify) 
 4. A Zuora Gateway set up (http://knowledgecenter.zuora.com/index.php/Z-Payments_Admin#Setup_Payment_Gateway)
     a) Either Authorize.net, CyberSource, PayPal Payflow Pro (production or test)
     b) The setting "Verify new credit card" disabled
